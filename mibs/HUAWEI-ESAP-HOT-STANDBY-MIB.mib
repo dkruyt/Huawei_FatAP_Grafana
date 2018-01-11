@@ -1,0 +1,443 @@
+-- =================================================================
+-- Copyright (C) 2013 by  HUAWEI TECHNOLOGIES. All rights reserved.
+--
+-- Description:HUAWEI-ESAP-HOT-STANDBY
+-- Reference:
+-- Version: V1.0
+-- History:
+--
+-- =================================================================
+
+    HUAWEI-ESAP-HOT-STANDBY-MIB DEFINITIONS ::= BEGIN
+ 
+        IMPORTS
+            hwDatacomm			
+                FROM HUAWEI-MIB
+            InterfaceIndexOrZero            
+                FROM IF-MIB 
+            SnmpAdminString            
+                FROM SNMP-FRAMEWORK-MIB	
+            OBJECT-GROUP, NOTIFICATION-GROUP, MODULE-COMPLIANCE			
+                FROM SNMPv2-CONF			
+            TimeTicks, IpAddress, Integer32, Gauge32, OBJECT-TYPE, 
+            MODULE-IDENTITY, NOTIFICATION-TYPE
+                FROM SNMPv2-SMI			
+            DateAndTime, DisplayString, TEXTUAL-CONVENTION, TruthValue			
+                FROM SNMPv2-TC;
+				
+        hwEsapHsbMIB MODULE-IDENTITY 
+            LAST-UPDATED "201307301955Z"
+            ORGANIZATION 
+                "Huawei Technologies Co.,Ltd."
+            CONTACT-INFO 
+                "Huawei Industrial Base
+                  Bantian, Longgang
+                   Shenzhen 518129
+                   People's Republic of China
+                   Website: http://www.huawei.com
+                   Email: support@huawei.com"
+            DESCRIPTION 
+                "The MIB contains objects of huawei-ar-hot-standby , referencing the draft-grall-huawei-ar-hot-standby-mib-01."
+
+            REVISION    "201307301955Z"
+            DESCRIPTION "Modify hwEsapHsbBasicEventTime attribute type from DateAndTime to SnmpAdminString,
+             make it analyze OCTET type time string successfully ."
+                
+            REVISION    "201302041840Z"  
+            DESCRIPTION "Modify mib nodes OID.So that, eSAP V1R7 version mib nodes 
+            can be compatible to last version's mib nodes." 
+
+            ::= { hwDatacomm 309 }
+                
+-- Node definitions
+ 
+        hwEsapHsbObject OBJECT IDENTIFIER ::= { hwEsapHsbMIB 1 }
+
+
+-- Description Of Hsb Mib Basic Type
+        hwEsapHsbBasicEventsTable OBJECT-TYPE
+            SYNTAX SEQUENCE OF HwEsapHsbBasicEventsEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "
+                Table of basic data for Esap HSB events.  The agent 
+                may choose to delete the instances of cEsapHsbBasicEventsEntry
+                as required because of lack of memory.  The oldest Events 
+                will be selected first for deletion.
+                "
+            ::= { hwEsapHsbObject 1 }
+
+        
+        hwEsapHsbBasicEventsEntry OBJECT-TYPE
+            SYNTAX HwEsapHsbBasicEventsEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "
+                An entry in the table, containing general information
+                about an event. This table will always be sparse, i.e., 
+                each row will instanciate only a subet of the columnar
+                objects.
+                "
+            INDEX { hwEsapHsbBasicEventIndex }
+            ::= { hwEsapHsbBasicEventsTable 1 }
+
+        
+        HwEsapHsbBasicEventsEntry ::=
+            SEQUENCE { 
+                hwEsapHsbBasicEventIndex
+                    Integer32,
+                hwEsapHsbBasicEventTime
+                    SnmpAdminString,
+                hwEsapHsbBasicEventDescription
+                    SnmpAdminString
+             }
+
+
+        hwEsapHsbBasicEventIndex OBJECT-TYPE
+            SYNTAX Integer32
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "
+                An index that uniquely identifies an entry in the 
+                log table.  These indices are assigned beginning 
+                with 1 and increase by one with each new event logged.
+                "
+            ::= { hwEsapHsbBasicEventsEntry 1 }
+
+        
+        hwEsapHsbBasicEventTime OBJECT-TYPE
+            SYNTAX SnmpAdminString
+            MAX-ACCESS read-only
+            STATUS current
+            DESCRIPTION
+                "
+                The time that the event occurred.
+                "
+            ::= { hwEsapHsbBasicEventsEntry 2 }
+
+        hwEsapHsbBasicEventDescription OBJECT-TYPE
+            SYNTAX SnmpAdminString
+            MAX-ACCESS read-only
+            STATUS current
+            DESCRIPTION
+                "A description of the event. The value of the object may
+                be a zero-length string."
+            ::= { hwEsapHsbBasicEventsEntry 4 }
+	    
+-- Description Of Hsb Service Table
+        hwHsbServiceTable OBJECT-TYPE
+            SYNTAX SEQUENCE OF HwHsbServiceEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "
+                The Hot Standby Service table.
+                "
+            ::= { hwEsapHsbObject 4 }
+            
+            hwHsbServiceEntry OBJECT-TYPE
+                SYNTAX HwHsbServiceEntry
+                MAX-ACCESS not-accessible
+                STATUS current
+                DESCRIPTION
+                    "
+                    The Hot Standby Service table struct.
+                    "
+                INDEX { hwHsbServiceId }
+                ::= { hwHsbServiceTable 1 }
+            
+            HwHsbServiceEntry ::=
+                SEQUENCE { 
+                    hwHsbServiceId
+                        Integer32,
+                    hwHsbLocalAddr
+                        IpAddress,
+                    hwHsbLocalPort
+                        Integer32,
+                    hwHsbPeerAddr
+                        IpAddress,
+                    hwHsbPeerPort
+                        Integer32,
+                    hwHsbKeepAliveTimes
+                        Integer32,
+                    hwHsbKeepAliveInterval
+                        Integer32,
+                    hwHsbServiceStatus
+                        OCTET STRING
+                 }
+            
+-- hot standby service index
+                hwHsbServiceId OBJECT-TYPE
+                    SYNTAX Integer32 (0..15)
+                    MAX-ACCESS read-only
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        The Hot Standby Service Id.          
+                        This item is index.
+                        "
+                    ::= { hwHsbServiceEntry 1 }
+                
+-- local IP of hot standby service
+                hwHsbLocalAddr OBJECT-TYPE
+                    SYNTAX IpAddress
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the local IP address of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 2 }
+                
+-- local Port of hot standby service
+                hwHsbLocalPort OBJECT-TYPE
+                    SYNTAX Integer32 (10240..49152)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the local Port of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 3 }
+                    
+-- peer IP of hot standby service
+                hwHsbPeerAddr OBJECT-TYPE
+                    SYNTAX IpAddress
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the peer IP address of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 4 }
+                
+-- peer Port of hot standby service
+                hwHsbPeerPort OBJECT-TYPE
+                    SYNTAX Integer32 (10240..49152)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the peer Port of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 5 }
+                    
+-- keep alive times of hot standby service
+                hwHsbKeepAliveTimes OBJECT-TYPE
+                    SYNTAX Integer32 (1..20)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the keep alive times of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 6 }
+                
+-- keep alive interval of hot standby service
+                hwHsbKeepAliveInterval OBJECT-TYPE
+                    SYNTAX Integer32 (1..10)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the keep alive interval of Hot Standby Service configuration.
+                        "
+                    ::= { hwHsbServiceEntry 7 }
+                
+-- hot standby service status
+                hwHsbServiceStatus OBJECT-TYPE
+                    SYNTAX OCTET STRING (SIZE (1..32))
+                    MAX-ACCESS read-only
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows current tunnel status of Hot Standby Service.
+                        "
+                    ::= { hwHsbServiceEntry 8 }
+                         
+-- Description Of Hsb Group Table
+        hwHsbGroupTable OBJECT-TYPE
+            SYNTAX SEQUENCE OF HwHsbGroupEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "
+                The Hot-Standby-Group table.
+                "
+            ::= { hwEsapHsbObject 2 }
+            
+            hwHsbGroupEntry OBJECT-TYPE
+                SYNTAX HwHsbGroupEntry
+                MAX-ACCESS not-accessible
+                STATUS current
+                DESCRIPTION
+                    "
+                    The Hot Standby Group table struct.
+                    "
+                INDEX { hwHsbGroupId }
+                ::= { hwHsbGroupTable 1 }
+            
+            HwHsbGroupEntry ::=
+                SEQUENCE { 
+                    hwHsbGroupId
+                        Integer32,
+                    hwHsbGroupVrrpId
+                        Integer32,
+                    hwHsbGroupVrrpIf
+                        OCTET STRING,
+                    hwHsbGroupVrrpStatus
+                        OCTET STRING,
+                    hwHsbGroupServiceId
+                        Integer32,
+                    hwHsbGroupEnable
+                        TruthValue,
+                    hwHsbGroupStatus
+                        OCTET STRING
+                 }
+            
+-- hot standby group index 
+                hwHsbGroupId OBJECT-TYPE
+                    SYNTAX Integer32 (0..255)
+                    MAX-ACCESS read-only
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        The Hot Standby Group Id.          
+                        This item is index.
+                        "
+                    ::= { hwHsbGroupEntry 1 }
+                
+-- vrrp group Id that hot standby group binds
+                hwHsbGroupVrrpId OBJECT-TYPE
+                    SYNTAX Integer32 (1..255)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the Vrrp Group Id that the Hot Standby Group binds.
+                        "
+                    ::= { hwHsbGroupEntry 2 }
+                
+-- vrrp group interface
+                hwHsbGroupVrrpIf OBJECT-TYPE
+                    SYNTAX OCTET STRING (SIZE (1..32))
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the Interface where the Vrrp Group created.
+                        "
+                    ::= { hwHsbGroupEntry 3 }
+                
+-- vrrp status of hot standby group
+                hwHsbGroupVrrpStatus OBJECT-TYPE
+                    SYNTAX OCTET STRING (SIZE (1..32))
+                    MAX-ACCESS read-only
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows current vrrp status of the Hot Standby Group.
+                        "
+                    ::= { hwHsbGroupEntry 4 }
+
+-- service bond by hot standby group
+                hwHsbGroupServiceId OBJECT-TYPE
+                    SYNTAX Integer32 (0..15)
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the Hot Standby Service that Hot Standby Group binds.
+                        "
+                    ::= { hwHsbGroupEntry 5 }
+                    
+-- hsb enable status of hot standby group
+                hwHsbGroupEnable OBJECT-TYPE
+                    SYNTAX TruthValue
+                    MAX-ACCESS read-write
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows the HSB enable status of Hot Standby Group.
+                        "
+                    ::= { hwHsbGroupEntry 6 }
+                    
+-- hot standby group  status
+                hwHsbGroupStatus OBJECT-TYPE
+                    SYNTAX OCTET STRING (SIZE (1..32))
+                    MAX-ACCESS read-only
+                    STATUS current
+                    DESCRIPTION
+                        "
+                        This item shows current status of the Hot Standby Group.
+                        "
+                    ::= { hwHsbGroupEntry 7 }
+                    
+-- Description Of Hot Standby Group Vrrp Notification
+        hwEsapHsbMIBNotifications OBJECT IDENTIFIER ::= { hwEsapHsbObject 3 }
+        
+
+        hwEsapHsbStatusNotification NOTIFICATION-TYPE
+            OBJECTS { hwHsbGroupId, hwEsapHsbBasicEventTime, hwEsapHsbBasicEventDescription }
+            STATUS current
+            DESCRIPTION
+                "
+                This notification is used for events that Hot Standby Group 
+                status changes from one to another.
+                "
+            ::= { hwEsapHsbMIBNotifications 1 }
+            
+        
+
+        hwEsapHsbMibConformance OBJECT IDENTIFIER ::= { hwEsapHsbMIB 2 }
+        
+         
+        hwEsapHsbMibGroups OBJECT IDENTIFIER ::= { hwEsapHsbMibConformance 1 }
+        
+        
+        hwEsapHsbMibNotificationGroup NOTIFICATION-GROUP
+            NOTIFICATIONS { hwEsapHsbStatusNotification }
+            STATUS current
+            DESCRIPTION 
+                "
+                This item is a Hot Standby Group Notification, tells the backup status 
+                changes of Hot Standby Group.
+                "
+            ::= { hwEsapHsbMibGroups 1 }
+            
+       hwEsapHsbBasicMibGroup OBJECT-GROUP
+       OBJECTS { hwEsapHsbBasicEventTime,hwEsapHsbBasicEventDescription }
+            STATUS current
+            DESCRIPTION 
+                "This is the hot standby basic event group."
+            ::= { hwEsapHsbMibGroups 2 }
+                        
+       hwEsapHsbGroupMibGroup OBJECT-GROUP
+       OBJECTS { hwHsbGroupId, hwHsbGroupVrrpId, hwHsbGroupVrrpIf, hwHsbGroupVrrpStatus, hwHsbGroupServiceId, hwHsbGroupEnable, hwHsbGroupStatus }
+            STATUS current
+            DESCRIPTION 
+                "This is the Hot Standby Group group."
+            ::= { hwEsapHsbMibGroups 3 }
+
+       hwEsapHsbServiceMibGroup OBJECT-GROUP
+       OBJECTS { hwHsbServiceId,hwHsbLocalAddr,hwHsbLocalPort,hwHsbPeerAddr,hwHsbPeerPort,hwHsbKeepAliveTimes,hwHsbKeepAliveInterval,hwHsbServiceStatus }
+            STATUS current
+            DESCRIPTION 
+                "This is the hot standby service group."
+            ::= { hwEsapHsbMibGroups 4 }
+            
+       hwEsapHsbMIBCompliances OBJECT IDENTIFIER ::= { hwEsapHsbMibConformance 2 }
+       
+       hwEsapHsbMIBCompliance MODULE-COMPLIANCE
+            STATUS current
+            DESCRIPTION 
+                "The compliance statement for entities which implement
+                the hwEsapHsbMIB."
+            MODULE
+                MANDATORY-GROUPS {hwEsapHsbMibNotificationGroup, hwEsapHsbBasicMibGroup,  hwEsapHsbGroupMibGroup, hwEsapHsbServiceMibGroup}
+            ::= { hwEsapHsbMIBCompliances 1 }
+        
+END

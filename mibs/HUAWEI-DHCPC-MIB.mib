@@ -1,0 +1,774 @@
+-- ===================================================================
+-- Copyright (C) 2010 by HUAWEI TECHNOLOGIES. All rights reserved.
+-- Description: 
+-- Reference:
+-- Version: V1.01
+-- ===================================================================
+
+
+    HUAWEI-DHCPC-MIB DEFINITIONS ::= BEGIN
+ 
+        IMPORTS                                            
+            OBJECT-GROUP, MODULE-COMPLIANCE, NOTIFICATION-GROUP            
+                FROM SNMPv2-CONF            
+            DisplayString, RowStatus                        
+                FROM SNMPv2-TC
+			ifIndex            
+				FROM RFC1213-MIB
+            TimeTicks, Integer32, Unsigned32, IpAddress, Counter32, OBJECT-TYPE, 
+            MODULE-IDENTITY, NOTIFICATION-TYPE            
+                FROM SNMPv2-SMI
+            hwDhcp            
+                FROM HUAWEI-MIB;
+    
+    
+    hwDHCPClientMib MODULE-IDENTITY 
+        LAST-UPDATED "201008111600Z"        
+        ORGANIZATION 
+            "Huawei Technologies Co.,Ltd."
+        CONTACT-INFO 
+            "Huawei Industrial Base
+			Bantian, Longgang
+			Shenzhen 518129
+			People's Republic of China
+			Website: http://www.huawei.com
+			Email: support@huawei.com
+			"
+            DESCRIPTION 
+                "Please provide the descritpion."
+            REVISION    "201008111600Z"   
+            DESCRIPTION "V1.00, initial version."
+           REVISION    "201404211600Z"   
+            DESCRIPTION "V1.01, initial version."
+
+    
+            ::= { hwDhcp 3 }
+
+    hwDHCPClientMibObject OBJECT IDENTIFIER ::= { hwDHCPClientMib 1 }
+    
+	-- node definitions
+	
+	hwDHCPCSysClassId OBJECT-TYPE
+	        SYNTAX     OCTET STRING(SIZE(1..64))
+	        MAX-ACCESS read-write
+	        STATUS current
+	        DESCRIPTION
+	            "Configure Class identifier of the device. "
+	        ::= { hwDHCPClientMibObject 1 }
+	
+	hwDHCPCSysClassIdUndo OBJECT-TYPE
+	        SYNTAX INTEGER
+			{
+				undo(0)			
+			}
+	        MAX-ACCESS read-write
+	        STATUS current
+	        DESCRIPTION
+	            "Cancel current configuration of Class identifier."
+	        ::= { hwDHCPClientMibObject 2 }
+			
+    -- =================================================================
+    -- 1st Table of hwDHCPClientMibObjects: hwDHCPClientCfgTable
+    -- =================================================================
+    hwDHCPClientCfgTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF HwDHCPClientCfgEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "A table for configuring enable flag for DHCP client."
+        ::= { hwDHCPClientMibObject 3 }
+    
+    hwDHCPClientCfgEntry OBJECT-TYPE
+        SYNTAX HwDHCPClientCfgEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "An entry for configuring dhcp client."
+        INDEX { hwDHCPClientIfIndex }
+        ::= { hwDHCPClientCfgTable 1 }
+    
+    HwDHCPClientCfgEntry ::=
+        SEQUENCE {
+			hwDHCPClientIfIndex
+				Unsigned32,
+            hwDHCPClientEnable
+                INTEGER,
+            hwDHCPClientClassId
+                OCTET STRING,
+		    hwDHCPClientClientId
+			    OCTET STRING,
+			hwDHCPClientHostName
+			    OCTET STRING,
+			hwDHCPClientExpectedLease
+				Unsigned32,
+			hwDHCPClientRoutePreference
+				Unsigned32,
+			hwDHCPClientNetworkPort
+			    OCTET STRING,
+			hwDHCPClientGatewayDetectPeriod
+				Unsigned32,
+			hwDHCPClientGatewayDetectRetransmit
+				Unsigned32,
+			hwDHCPClientGatewayDetectTimeout
+				Unsigned32,
+			hwDHCPClientUndoFlag
+				INTEGER
+         }
+
+    hwDHCPClientIfIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "The interface index."
+        ::= { hwDHCPClientCfgEntry 1 }
+		
+	hwDHCPClientEnable OBJECT-TYPE
+        SYNTAX INTEGER
+		{
+            disable(0),
+            dhcp(1),
+            bootp(2)
+        }
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The client enable mode."
+        ::= { hwDHCPClientCfgEntry 2 }
+	
+	hwDHCPClientClassId OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..64))
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The class identifier of the client."
+        ::= { hwDHCPClientCfgEntry 3 }
+	
+		
+	hwDHCPClientClientId OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0 | 2..64))
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The client identifier of the client."
+        ::= { hwDHCPClientCfgEntry 4 }
+		
+
+	hwDHCPClientHostName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..64))
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The host name of the client."
+        ::= { hwDHCPClientCfgEntry 5 }
+	
+	
+	hwDHCPClientExpectedLease OBJECT-TYPE
+        SYNTAX Unsigned32(0 | 60..864000)
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The expected lease of the client."
+        ::= { hwDHCPClientCfgEntry 6 }
+		
+	hwDHCPClientRoutePreference OBJECT-TYPE
+        SYNTAX Unsigned32(0..255)
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The route preference of the client."
+        ::= { hwDHCPClientCfgEntry 7 }
+		
+	hwDHCPClientNetworkPort OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..64))
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The network port of the client."
+        ::= { hwDHCPClientCfgEntry 8 }
+		
+	hwDHCPClientGatewayDetectPeriod OBJECT-TYPE
+        SYNTAX Unsigned32(0..86400)
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "The period time of the client send arp to detect gateway.."
+        ::= { hwDHCPClientCfgEntry 9 }
+	
+	hwDHCPClientGatewayDetectRetransmit OBJECT-TYPE
+        SYNTAX Unsigned32(0..10)
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "Gateway detect retransmit times. "
+        ::= { hwDHCPClientCfgEntry 10 }
+	
+	hwDHCPClientGatewayDetectTimeout OBJECT-TYPE
+        SYNTAX Unsigned32(0 | 300..2000)
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "Time out milliseconds of gateway detect ."
+        ::= { hwDHCPClientCfgEntry 11 }
+	
+	hwDHCPClientUndoFlag OBJECT-TYPE
+        SYNTAX INTEGER
+            {
+			invalid(0),
+            undoClassId(1),
+            undoClientId(2),
+            undoHostName(3),
+            undoExpectLease(4),
+            undoRoutePreference(5),
+            undoNetworkPort(6),
+			undoGatewayDetect(7)
+            }
+        MAX-ACCESS read-write
+        STATUS current
+        DESCRIPTION
+            "Flag of undo-operation for
+            hwDHCPSInterfacePoolParaTable
+            
+            Each value has the following meaning:
+			invalid(0)             - The value is a default value,do nothing,
+            undoClassId(1)         - It means to delete class-id,
+            undoClientId(2)        - It means to delete client-id,
+            undoHostName(3)        - It means to delete hostname,
+            undoExpectLease(4)     - It means to delete expected lease,
+            undoRoutePreference(5) - It means to deletd default-route preference,
+            undoNetworkPort(6)     - It means to delete network-port,
+            undoGatewayDetect(7)   - It means to delete gateway detect. 
+            "
+        ::= { hwDHCPClientCfgEntry 12 }
+		
+	
+	-- =================================================================
+    -- 2nd Table of hwDHCPClientMibObject: hwDHCPCDynRouteTable
+    -- =================================================================
+    hwDHCPCDynRouteTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF HwDHCPCDynRouteEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "A table for configuring dhcp dynamic route."
+        ::= { hwDHCPClientMibObject 4 }
+    
+    hwDHCPCDynRouteEntry OBJECT-TYPE
+        SYNTAX HwDHCPCDynRouteEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "An entry for configuring dhcp dynamic route."
+        INDEX { hwDHCPCDynRouteIndex }
+        ::= { hwDHCPCDynRouteTable 1 }
+    
+    HwDHCPCDynRouteEntry ::=
+        SEQUENCE { 
+			hwDHCPCDynRouteIndex
+				Unsigned32,
+            hwDHCPCDynRouteDestIp
+                IpAddress,
+			hwDHCPCDynRouteMask
+				IpAddress,
+			hwDHCPCDynRouteInterfaceName
+				OCTET STRING,
+			hwDHCPCDynRoutePreference
+				Unsigned32,
+			hwDHCPCDynRouteRowStatus
+                RowStatus
+         }
+		 
+	hwDHCPCDynRouteIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "The index  of the dynamic route "
+        ::= { hwDHCPCDynRouteEntry 1 }
+		
+	
+    hwDHCPCDynRouteDestIp OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+            "The destination ip address  of the dynamic route "
+        ::= { hwDHCPCDynRouteEntry 2 }
+	
+	hwDHCPCDynRouteMask OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS  read-create
+        STATUS current
+        DESCRIPTION
+            "The mask of the dynamic route "
+        ::= { hwDHCPCDynRouteEntry 3 }
+	
+	hwDHCPCDynRouteInterfaceName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..64))
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+            "The inteface name  of the dynamic route "
+        ::= { hwDHCPCDynRouteEntry 4 }
+	
+	hwDHCPCDynRoutePreference OBJECT-TYPE
+        SYNTAX Unsigned32(0..255)
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+            "The preference of the dynamic route "
+        ::= { hwDHCPCDynRouteEntry 5 }
+		
+	hwDHCPCDynRouteRowStatus OBJECT-TYPE
+        SYNTAX RowStatus
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+            "This object is used to configuration new rows in this
+            table, modify existing rows, and to delete
+            existing rows.Only three actions are used: active(1),
+            createAndGo(4), destroy(6).
+            while configuration new option, you must specify option type 
+            and value"
+        ::= { hwDHCPCDynRouteEntry 6 }
+		
+
+    
+    -- =================================================================
+    -- 3nd Table of hwDHCPClientMibObject: hwDHCPClientInfoTable
+    -- =================================================================
+    hwDHCPClientInfoTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF HwDHCPClientInfoEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "A table for  dhcp client information."
+        ::= { hwDHCPClientMibObject 5 }
+    
+    hwDHCPClientInfoEntry OBJECT-TYPE
+        SYNTAX HwDHCPClientInfoEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "An entry for viewing dhcp client information."
+        INDEX { hwDHCPClientInfoIfIndex }
+        ::= { hwDHCPClientInfoTable 1 }
+    
+    HwDHCPClientInfoEntry ::=
+        SEQUENCE { 
+			hwDHCPClientInfoIfIndex
+				Unsigned32,
+            hwDHCPClientIpAddress
+                IpAddress,
+			hwDHCPClientIpMask
+                IpAddress,
+			hwDHCPClientLeaseObtained
+				OCTET STRING,
+			hwDHCPClientLease
+				Unsigned32,
+			hwDHCPClientDnsIp
+				OCTET STRING,
+			hwDHCPClientNbnsIp
+				OCTET STRING,
+			hwDHCPClientDomain
+				OCTET STRING,
+			hwDHCPClientGatewayIp
+				OCTET STRING
+         }
+
+    hwDHCPClientInfoIfIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "The interface index of the client "
+        ::= { hwDHCPClientInfoEntry 1 }
+	
+	hwDHCPClientIpAddress OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The ip address of the client "
+        ::= { hwDHCPClientInfoEntry 2 }
+	
+	hwDHCPClientIpMask OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The ip address mask of the client "
+        ::= { hwDHCPClientInfoEntry 3 }
+	
+	hwDHCPClientLeaseObtained OBJECT-TYPE
+        SYNTAX OCTET STRING
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The lease time obtained of the client "
+        ::= { hwDHCPClientInfoEntry 4 }
+		
+	hwDHCPClientLease OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The lease of the client "
+        ::= { hwDHCPClientInfoEntry 5 }
+		
+	hwDHCPClientDnsIp OBJECT-TYPE
+        SYNTAX OCTET STRING
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The dns ip of the client "
+        ::= { hwDHCPClientInfoEntry 6 }
+		
+	hwDHCPClientNbnsIp OBJECT-TYPE
+        SYNTAX OCTET STRING
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The nbns ip of the client "
+        ::= { hwDHCPClientInfoEntry 7 }
+	
+	hwDHCPClientDomain OBJECT-TYPE
+        SYNTAX OCTET STRING
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The domain name of the client "
+        ::= { hwDHCPClientInfoEntry 8 }
+		
+	hwDHCPClientGatewayIp OBJECT-TYPE
+        SYNTAX OCTET STRING
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The gateway ip of the client "
+        ::= { hwDHCPClientInfoEntry 9 }
+		
+    -- =================================================================
+    -- 4rd Table of hwDHCPClientMibObject: hwDHCPClientStatTable
+    -- =================================================================
+    hwDHCPClientStatTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF HwDHCPClientStatEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Packet statistics of each dhcp client."
+        ::= { hwDHCPClientMibObject 6 }
+    
+    hwDHCPClientStatEntry OBJECT-TYPE
+        SYNTAX HwDHCPClientStatEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "An entry for query dhcp client packet statistics."
+        INDEX { hwDHCPClientStatIfIndex }
+        ::= { hwDHCPClientStatTable 1 }
+    
+    HwDHCPClientStatEntry ::=
+        SEQUENCE { 
+            hwDHCPClientStatIfIndex
+                Unsigned32,
+			hwDHCPCInputPktNum
+				Counter32,
+			hwDHCPCBootpReplyPktNum
+				Counter32,
+			hwDHCPCOfferPktNum
+				Counter32,
+			hwDHCPCAckPktNum
+				Counter32,
+			hwDHCPCNakPktNum
+				Counter32,
+			hwDHCPCOutputPktNum
+				Counter32,
+			hwDHCPCBootpRequestPktNum
+				Counter32,
+			hwDHCPCDiscoverPktNum
+				Counter32,
+			hwDHCPCRequestPktNum
+				Counter32,
+			hwDHCPCInitRebootPktNum
+				Counter32,
+			hwDHCPCSelectingPktNum
+				Counter32,
+			hwDHCPCRenewingPktNum
+				Counter32,
+			hwDHCPCRebindingPktNum
+				Counter32,
+			hwDHCPCDeclinePktNum
+				Counter32,
+			hwDHCPCReleasePktNum
+				Counter32
+         }
+         
+    hwDHCPClientStatIfIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "The interface index. "
+        ::= { hwDHCPClientStatEntry 1 }
+	
+	hwDHCPCInputPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The total number of input packet. "
+        ::= { hwDHCPClientStatEntry 2 }
+	
+	hwDHCPCBootpReplyPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The reply packet number . "
+        ::= { hwDHCPClientStatEntry 3 }
+	
+	hwDHCPCOfferPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The OFFER packet number. "
+        ::= { hwDHCPClientStatEntry 4 }
+	
+	hwDHCPCAckPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The ACK packet number. "
+        ::= { hwDHCPClientStatEntry 5 }
+	
+	hwDHCPCNakPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The NAK packet number. "
+        ::= { hwDHCPClientStatEntry 6 }
+	
+	hwDHCPCOutputPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The total number of input packet. "
+        ::= { hwDHCPClientStatEntry 7 }
+	
+	hwDHCPCBootpRequestPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "All request packet number. "
+        ::= { hwDHCPClientStatEntry 8 }
+	
+	hwDHCPCDiscoverPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The DISCOVER packet number. "
+        ::= { hwDHCPClientStatEntry 9 }
+	
+	hwDHCPCRequestPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The REUEST packet number. "
+        ::= { hwDHCPClientStatEntry 10 }
+	
+	hwDHCPCInitRebootPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The INIT-REBOOT REQUEST packet number. "
+        ::= { hwDHCPClientStatEntry 11 }
+	
+	hwDHCPCSelectingPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The SELECTING REQUEST packet number. "
+        ::= { hwDHCPClientStatEntry 12 }
+	
+	hwDHCPCRenewingPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The RENEWING REQUEST packet number. "
+        ::= { hwDHCPClientStatEntry 13 }
+	
+	hwDHCPCRebindingPktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The REBINDING REQUEST packet number. "
+        ::= { hwDHCPClientStatEntry 14 }
+	
+	hwDHCPCDeclinePktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The DECLINE packet number. "
+        ::= { hwDHCPClientStatEntry 15 }
+	
+	hwDHCPCReleasePktNum OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The RELEASE packet number. "
+        ::= { hwDHCPClientStatEntry 16 }
+	
+    -- =================================================================
+    -- 5rd Table of hwDHCPClientMibObject: hwDHCPCStaticRouterTable
+    -- =================================================================
+    hwDHCPCStaticRouteTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF HwDHCPCStaticRouteEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Static route of each dhcp client."
+        ::= { hwDHCPClientMibObject 7 }
+    
+    hwDHCPCStaticRouteEntry OBJECT-TYPE
+        SYNTAX HwDHCPCStaticRouteEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "An entry for query dhcp client packet statistics."
+        INDEX { hwDHCPCStaticRouteIndex }
+        ::= { hwDHCPCStaticRouteTable 1 }
+    
+    HwDHCPCStaticRouteEntry ::=
+        SEQUENCE { 
+			hwDHCPCStaticRouteIndex
+				Unsigned32,
+            hwDHCPCStaticRouteDest
+                IpAddress,
+			hwDHCPCStaticRouteMask
+				IpAddress,
+			hwDHCPCStaticRouteNextHop
+				IpAddress,
+			hwDHCPCStaticRouteType
+				Unsigned32,
+			hwDHCPCStaticRoutePreference
+				Unsigned32,
+			hwDHCPCStaticRouteOutInterfaceName
+				OCTET STRING,
+			hwDHCPCStaticRouteVrfName
+				OCTET STRING
+        }
+		
+	hwDHCPCStaticRouteIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "The index of this route. "
+        ::= { hwDHCPCStaticRouteEntry 1 }
+	
+    hwDHCPCStaticRouteDest OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The destination IP address of this route. "
+        ::= { hwDHCPCStaticRouteEntry 2 }
+	
+	hwDHCPCStaticRouteMask OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Indicate the mask to be logical-ANDed with the
+			 destination address before being compared to the
+			 value in the ipRouteDest field. "
+        ::= { hwDHCPCStaticRouteEntry 3 }
+	
+	hwDHCPCStaticRouteNextHop OBJECT-TYPE
+        SYNTAX IpAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The IP address of the next hop of this route. "
+        ::= { hwDHCPCStaticRouteEntry 4 }
+	
+	hwDHCPCStaticRouteType OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The type of route. "
+        ::= { hwDHCPCStaticRouteEntry 5 }
+	
+	hwDHCPCStaticRoutePreference OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The preference of route. "
+        ::= { hwDHCPCStaticRouteEntry 6 }
+		
+
+	hwDHCPCStaticRouteOutInterfaceName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..64))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The out interface name of route. "
+        ::= { hwDHCPCStaticRouteEntry 7 }
+	
+	hwDHCPCStaticRouteVrfName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..31))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The vpn instance name of route. "
+        ::= { hwDHCPCStaticRouteEntry 8 }
+		
+		
+      
+    hwDHCPClientMIBConformance OBJECT IDENTIFIER ::= { hwDHCPClientMib 2 }
+    
+    hwDHCPClientMIBCompliances OBJECT IDENTIFIER ::= { hwDHCPClientMIBConformance 1 }
+    hwDHCPClientMIBCompliance  MODULE-COMPLIANCE
+               STATUS      current
+               DESCRIPTION
+                   "The compliance statement for systems supporting 
+                this module."
+
+               MODULE      -- this module
+               MANDATORY-GROUPS    { hwDHCPClientMIBGroup}  
+                                               
+              ::= { hwDHCPClientMIBCompliances 1 }
+    hwDHCPClientMIBGroups OBJECT IDENTIFIER ::= { hwDHCPClientMIBConformance 2 }
+    
+    hwDHCPClientMIBGroup OBJECT-GROUP
+        OBJECTS {   hwDHCPCSysClassId,hwDHCPCSysClassIdUndo,hwDHCPClientEnable, hwDHCPClientClassId, hwDHCPClientClientId, hwDHCPClientHostName, hwDHCPClientExpectedLease,hwDHCPClientRoutePreference, hwDHCPClientNetworkPort,
+					hwDHCPClientGatewayDetectPeriod,hwDHCPClientGatewayDetectRetransmit,hwDHCPClientGatewayDetectTimeout,hwDHCPClientUndoFlag,
+					hwDHCPCDynRouteDestIp,hwDHCPCDynRouteMask,hwDHCPCDynRouteInterfaceName,hwDHCPCDynRoutePreference,hwDHCPCDynRouteRowStatus,
+					hwDHCPClientIpAddress,hwDHCPClientIpMask,hwDHCPClientLease,  hwDHCPClientDnsIp,hwDHCPClientNbnsIp, hwDHCPClientDomain,
+					hwDHCPClientGatewayIp,hwDHCPCInputPktNum, hwDHCPCBootpReplyPktNum,hwDHCPCOfferPktNum,hwDHCPCAckPktNum, hwDHCPCNakPktNum,
+					hwDHCPCOutputPktNum, hwDHCPCBootpRequestPktNum, hwDHCPCDiscoverPktNum,hwDHCPCRequestPktNum,hwDHCPCInitRebootPktNum,
+					hwDHCPCSelectingPktNum, hwDHCPCRenewingPktNum, hwDHCPCRebindingPktNum,hwDHCPCDeclinePktNum,hwDHCPCReleasePktNum,hwDHCPCStaticRouteDest,hwDHCPCStaticRouteMask,
+					hwDHCPCStaticRouteNextHop,hwDHCPCStaticRouteType,hwDHCPCStaticRoutePreference,hwDHCPCStaticRouteOutInterfaceName,hwDHCPCStaticRouteVrfName}
+        STATUS current
+        DESCRIPTION 
+            "The basic collection of objects providing management of
+            DHCP realy."
+        ::= { hwDHCPClientMIBGroups 1 }
+
+END
