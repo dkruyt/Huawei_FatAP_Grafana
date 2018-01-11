@@ -1,6 +1,6 @@
 ### Huawei_FatAP_Grafana 
 
-A templated Dashboard for Huawei Fat WLAN AP in Grafan
+A templated Dashboard for Huawei Fat WLAN AP in Grafana
 
 Dependencies InfluxDB as the time-series database and Telegraf as the collector should be installed.
 
