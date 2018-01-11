@@ -9,7 +9,7 @@ For all latest files, see [My GitHub page](https://github.com/dkruyt/Huawei_FatA
 ### Quick Start
 
 * Enable SNMP on your Huawei WLAN FAT Accespoint
-* Put hw_stor.conf in your `/etc/telegraf/telegraf.d` directory
+* Put hw_fatap.conf in your `/etc/telegraf/telegraf.d` directory
 * Edit the community string as appropriate
 * Edit the 'agents' list to include all of your monitored Fat WLAN Access points
 * Put the files in the mibs dir `/usr/share/snmp/mibs`
